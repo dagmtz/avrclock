@@ -1,0 +1,53 @@
+#ifndef CLOCK_H_
+#define CLOCK_H_
+
+#include <avr/io.h>
+
+#include <stdint.h>
+
+#include <time.h>
+
+#include <util/delay.h>
+
+#define DELAY_PER_DIGIT 1U
+
+#define DISPLAY_DIGITS_PORT PORTB
+#define DISPLAY_USS PORTB5
+#define DISPLAY_DSS PORTB4
+#define DISPLAY_UMM PORTB3
+#define DISPLAY_DMM PORTB2
+#define DISPLAY_UHH PORTB1
+#define DISPLAY_DHH PORTB0
+
+#define DISPLAY_DECODER_PORT PORTC
+#define BDC_7S_A PORTC0
+#define BDC_7S_B PORTC1
+#define BDC_7S_C PORTC2
+#define BDC_7S_D PORTC3
+
+typedef struct digits {
+    uint8_t d1;
+    uint8_t d2;
+    uint8_t d3;
+    uint8_t d4;
+    uint8_t d5;
+    uint8_t d6;
+} digits__s;
+
+typedef enum clock_state_tag {
+    show_time, 
+    set_time, 
+    show_date, 
+    set_date, 
+    set_alarm
+}clock_state__e;
+
+void split_time(digits__s *digits, struct tm *time);
+void split_date(digits__s *digits, struct tm *time);
+void turn_off_digits(void);
+void turn_on_digit(uint8_t);
+void show_digit(uint8_t);
+void display(digits__s *digits);
+void read_buttons(void);
+
+#endif /* CLOCK_H_ */
