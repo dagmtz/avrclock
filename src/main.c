@@ -157,8 +157,9 @@ void initialize()
     /* Set outputs and inputs */
     DDRB |= (1 << PORTB0) | (1 << PORTB1) | (1 << PORTB2) | (1 << PORTB3) | (1 << PORTB4) | (1 << PORTB5);
     DDRC |= (1 << PORTC0) | (1 << PORTC1) | (1 << PORTC2) | (1 << PORTC3);
-    DDRD &= ~(1 << PORTD2);
-    DDRD |= (1 << PORTD3);
+    DDRD &= ~((1 << PORTD2) | (1 << PORTD3) | (1 << PORTD4));
+    /* Set pull-ups */
+    PORTD |= (1 << PORTD2) | (1 << PORTD3) | (1 << PORTD4);
 
     uart_init( BAUD_CALC( BAUD ) ); // 8n1 transmission is set as default
 	
