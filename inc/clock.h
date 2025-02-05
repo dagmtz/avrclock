@@ -25,6 +25,16 @@
 #define BDC_7S_C PORTC2
 #define BDC_7S_D PORTC3
 
+#define BUTTONS_PORT PORTD
+#define BUTTON_1 PORTD2
+#define BUTTON_1_MASK 0b00000100
+#define BUTTON_2 PORTD3
+#define BUTTON_2_MASK 0b00001000
+#define BUTTON_3 PORTD4
+#define BUTTON_3_MASK 0b00010000
+
+#define BUTTONS_MASK 0b00011100
+
 typedef struct digits {
     uint8_t d1;
     uint8_t d2;
@@ -39,8 +49,16 @@ typedef enum clock_state_tag {
     set_time, 
     show_date, 
     set_date, 
-    set_alarm
+    set_alarm,
+    dim
 }clock_state__e;
+
+typedef enum clock_buttons_tag {
+    invalid,
+    function,
+    down,
+    up
+}clock_buttons__e;
 
 void split_time(digits__s *digits, struct tm *time);
 void split_date(digits__s *digits, struct tm *time);
