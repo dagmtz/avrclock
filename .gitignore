@@ -36,6 +36,7 @@
 
 # Debug files
 *.i
+*.dump
 
 # Kernel Module Compile Results
 *.mod*
