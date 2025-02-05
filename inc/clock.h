@@ -27,13 +27,13 @@
 
 #define BUTTONS_PORT PORTD
 #define BUTTON_1 PORTD2
-#define BUTTON_1_MASK 0b00000100
+#define BUTTON_1_MASK 0x04 /* 0b00000100 */
 #define BUTTON_2 PORTD3
-#define BUTTON_2_MASK 0b00001000
+#define BUTTON_2_MASK 0x08 /* 0b00001000 */
 #define BUTTON_3 PORTD4
-#define BUTTON_3_MASK 0b00010000
+#define BUTTON_3_MASK 0x10 /* 0b00010000 */
 
-#define BUTTONS_MASK 0b00011100
+#define BUTTONS_MASK 0x1C /* 0b00011100 */
 
 typedef struct digits {
     uint8_t d1;

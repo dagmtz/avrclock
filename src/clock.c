@@ -56,30 +56,35 @@ void display(digits__s *digits){
 }
 
 void read_buttons(){
-    static clock_buttons__e button_pressed = invalid;
+    static clock_buttons__e current_button = invalid;
+    static clock_buttons__e last_button = invalid;
     static uint16_t button_timer = 0;
 
     switch(PIND & BUTTONS_MASK){
         case BUTTON_1_MASK:
-            button_pressed = function;
-            button_timer++;
+            current_button = function;
         break;
 
         case BUTTON_2_MASK:
-            button_pressed = down;
-            button_timer++;
+            current_button = down;
         break;
 
         case BUTTON_3_MASK:
-            button_pressed = up;
-            button_timer++;
+            current_button = up;
         break;
 
         default:
-            button_pressed = invalid;
+            current_button = invalid;
             button_timer = 0;
         break;
     }
 
-    return;
+    if(last_button == current_button){
+        button_timer++;
+    }else{
+        button_timer = 0;
+        current_button = invalid;
+    }
+
+    last_button = current_button;
 }

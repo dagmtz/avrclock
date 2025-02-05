@@ -32,9 +32,33 @@ void rtc_getTime( struct tm *rtc_time )
 
 void rtc_setTime( struct tm *rtc_time )
 {
+	uint8_t buffer = 0;
+
 	i2c_start_sla( TW_SLA_W( DS3231_ADDRESS ) );
+	
 	i2c_write( DS3231_SECOND );
-	i2c_write( rtc_time->tm_sec );
+
+	buffer = ((rtc_time->tm_sec / 10) << 4) + (rtc_time->tm_sec % 10); 
+	i2c_write( buffer ); /* Seconds */
+
+	buffer = ((rtc_time->tm_min / 10) << 4) + (rtc_time->tm_min % 10); 
+	i2c_write( buffer ); /* Minutes */
+	
+	buffer = ((rtc_time->tm_hour / 10) << 4) + (rtc_time->tm_hour % 10); 
+	i2c_write( buffer ); /* Hours */
+	
+	buffer = (rtc_time->tm_wday + 1); 
+	i2c_write( buffer ); /* Week day */
+	
+	buffer = ((rtc_time->tm_mday / 10) << 4) + (rtc_time->tm_mday % 10); 
+	i2c_write( buffer ); /* Day of the month */
+	
+	buffer = (((rtc_time->tm_mon + 1) / 10) << 4) + ((rtc_time->tm_mon + 1) % 10); 
+	i2c_write( buffer ); /* Month */
+	
+	buffer = (((rtc_time->tm_year - 100) / 10) << 4) + (rtc_time->tm_year % 10); 
+	i2c_write( buffer ); /* Year */
+
 	i2c_stop();
 }
 

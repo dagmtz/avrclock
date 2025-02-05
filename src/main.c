@@ -37,10 +37,10 @@
 #define BUFFER_SIZE 30U
 
 /* Select heartbeat source via macro: 0 - No source, 1 - Internal int., 2 - External int. */
-#define __HEARTBEAT_SOURCE 1
+#define __HEARTBEAT_SOURCE 2
 
 /* Select time source via macro: 0 - No source, 1 - Internal EEPROM, 2 - External RTC */
-#define __TIME_SOURCE 1
+#define __TIME_SOURCE 2
 
 /* EEPROM address where time is stored */
 #define EEPROM_TIME_ADDR 0x40
@@ -48,10 +48,14 @@
 /* Uncomment next line if you want to set up the time into EEPROM once, then compile and flash, then comment back and compile and flash again.*/
 /* #define EEPROM_TIME_INIT */
 
+/* Uncomment next line if you want to set up the time into RTC once, then compile and flash, then comment back and compile and flash again.*/
+/* #define RTC_TIME_INIT */
+
 #define __HALT while(1U){;}
-#define UART_INFO uart_puts_P("\e[1;33m[INFO]: ")
-#define UART_ERROR uart_puts_P("\e[1;31m[ERROR]: ")
-#define UART_FCLEAN uart_puts_P("\e[0m")
+#define UART_INFO uart_puts_P("\r\033[1;33m[INFO]: ")
+#define UART_ERROR uart_puts_P("\r\033[1;31m[ERROR]: ")
+#define UART_FCLEAN uart_puts_P("\r\033[0m")
+#define UART_NL uart_puts_P("\r\n")
 
 /************************************************
  *       << Area for globals >>                 *
@@ -59,8 +63,8 @@
 volatile bool g_heartbeat_1s = false;
 volatile time_t __time = 0U;
 
-#ifdef EEPROM_TIME_INIT
-static const struct tm __initial_time_tm = {.tm_year = 125U, .tm_mon = 1U, .tm_mday = 3U, .tm_hour = 17U, .tm_min = 35U, .tm_sec = 0U};
+#if defined(EEPROM_TIME_INIT) || defined(RTC_TIME_INIT) 
+static const struct tm __initial_time_tm = {.tm_year = 125U, .tm_mon = 1U, .tm_mday = 5U, .tm_hour = 1U, .tm_min =25U, .tm_sec = 0U};
 static const time_t __initial_time_tag = 791683200U;
 #endif
 
@@ -84,6 +88,9 @@ void main(void){
     static struct tm rtc_time = {0U}; 
     static digits__s digits = {0U};
 
+    /* Initialization */
+    initialize();
+
 #ifdef EEPROM_TIME_INIT
     /* eeprom_update_dword((uint32_t *)EEPROM_TIME_ADDR, (uint32_t)__initial_time_tag); */
     rtc_time = __initial_time_tm;
@@ -91,34 +98,39 @@ void main(void){
     eeprom_update_dword((uint32_t *)EEPROM_TIME_ADDR, (uint32_t)system_time);
 #endif
 
+#ifdef RTC_TIME_INIT
+    rtc_time = __initial_time_tm;
+    system_time = mktime(&rtc_time);
+    rtc_setTime(&rtc_time);
+#endif
+
 #if __TIME_SOURCE == 1
     __time = eeprom_read_dword((uint32_t *)EEPROM_TIME_ADDR);
     UART_INFO;
 	uart_puts_P( "Time retrieved from internal EEPROM \r\n" );
 #elif __TIME_SOURCE == 2
+    rtc_getTime(&rtc_time);
+    __time = mktime(&rtc_time);
     UART_INFO;
-	uart_puts_P( "Heartbeat set from external interrupt \r\n" );
+	uart_puts_P( "Time retrieved from external RTC module\r\n" );
 #else 
     UART_ERROR;
 	uart_puts_P( "No heartbeat set, halting.\r\n" );
     __HALT
-#endif
-    
+#endif    
 
     system_time = __time;
     set_system_time(__time);    
-    set_zone(-6 * ONE_HOUR);
+    /* set_zone(-6 * ONE_HOUR); */
     localtime_r(&system_time, &rtc_time); 
 
 #ifdef UART_BUFFER
     char usartBuffer[BUFFER_SIZE];
 #endif
 
-    /* Initialization */
-    initialize();
-
     /* Clean format for UART text */
     UART_FCLEAN;
+    UART_NL;
 
     /* Main loop */
     while (1U) 
@@ -136,10 +148,9 @@ void main(void){
             }
 #endif
 
-            uart_puts_P( "\r\e[2K" );
-            printf("%s", ctime(&system_time));
+            uart_puts_P( "\r\033[2K" );
+            printf("\033[1;36m[TIME]:\033[1;37m %s", ctime(&system_time));
 
-            PORTD ^= (1 << PORTD2);
             g_heartbeat_1s = false;
         }else{
             /* Intentionally empty */
@@ -166,7 +177,7 @@ void initialize()
 	stdout = &uart0_io; // attach uart stream to stdout & stdin
 	stdin = &uart0_io; // uart0_in and uart0_out are only available if NO_USART_RX or NO_USART_TX is defined
 
-    uart_puts_P( "\e[2J\e[H" );
+    uart_puts_P( "\033[2J\033[H" );
     UART_INFO;
 	uart_puts_P( "USART ready\r\n" );
 
